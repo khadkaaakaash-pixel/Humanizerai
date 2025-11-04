@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI to Human Text Converter - Free Online Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #007bff; }
+        p { text-align: center; margin-bottom: 20px; }
+        textarea { width: 100%; height: 200px; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; resize: vertical; }
+        button { display: block; margin: 20px auto; padding: 12px 25px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #218838; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .progress { display: none; text-align: center; margin: 10px 0; }
+        .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
+        .footer a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI to Human Text Converter</h1>
+        <p>Convert any AI-generated content from ChatGPT, Gemini, Grok, Claude, DeepSeek, Jasper, Turnitin, QuillBot, Grammarly, or other tools to 100% human-like, authentic text for free. Paste your content below and click "Convert"!</p>
+        
+        <label for="inputText">Input AI-Generated Text:</label>
+        <textarea id="inputText" placeholder="Paste your AI text here (up to 1000 words)..."></textarea>
+        
+        <button id="convertBtn" onclick="convertText()">Convert to Human-Like Text</button>
+        <div class="progress" id="progress">Processing... Please wait.</div>
+        
+        <label for="outputText">Humanized Output:</label>
+        <textarea id="outputText" readonly placeholder="Your converted text will appear here..."></textarea>
+        
+        <div class="footer">
+            <p>Powered by OpenAI API. Free to use with limits. <a href="https://openai.com" target="_blank">Get your API key here</a>. Results may vary—review for authenticity.</p>
+        </div>
+    </div>
+
+    <script>
+        async function convertText() {
+            const input = document.getElementById('inputText').value.trim();
+            const btn = document.getElementById('convertBtn');
+            const progress = document.getElementById('progress');
+            
+            if (!input) {
+                alert('Please enter some text to convert.');
+                return;
+            }
+            if (input.length > 10000) {  // Approx 1000 words
+                alert('Text is too long. Please shorten to under 1000 words.');
+                return;
+            }
+
+            btn.disabled = true;
+            progress.style.display = 'block';
+
+            // Replace with your OpenAI API key
+            const apiKey = 'YOUR_OPENAI_API_KEY';
+            const url = 'https://api.openai.com/v1/chat/completions';
+
+            // Enhanced prompt for more human-like output
+            const prompt = `Rewrite the following AI-generated text to make it sound completely natural, human-like, and authentic. Remove any robotic or repetitive phrasing, add subtle variations in sentence structure, incorporate conversational elements like contractions or personal touches, and ensure it flows as if written by a real person. Do not mention that it's rewritten: "${input}"`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',  // Switch to 'gpt-4' for premium results if available
+                        messages: [{ role: 'user', content: prompt }],
+                        max_tokens: 1000,  // Allows longer outputs
+                        temperature: 0.8  // Higher for more creativity/variation
+                    })
+                });
+
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    document.getElementById('outputText').value = data.choices[0].message.content.trim();
+                } else {
+                    alert('Error: ' + (data.error ? data.error.message : 'API issue. Check your key.'));
+                }
+            } catch (error) {
+                alert('Conversion failed. Check your internet or API key.');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                progress.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
